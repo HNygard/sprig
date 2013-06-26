@@ -50,7 +50,7 @@ abstract class Sprig_Core {
 	protected $_table;
 
 	/**
-	 * @var  array  field list (name => object)
+	 * @var  Sprig_Field[]  field list (name => object)
 	 */
 	protected $_fields = array();
 
@@ -86,8 +86,6 @@ abstract class Sprig_Core {
 
 	/**
 	 * Initialize the fields and add validation rules based on field properties.
-	 *
-	 * @return  void
 	 */
 	protected function __construct()
 	{
@@ -1033,6 +1031,7 @@ abstract class Sprig_Core {
 	/**
 	 * Get a single field object.
 	 *
+     * @param  string   $name   Name of the field
 	 * @return  Sprig_Field
 	 */
 	public function field($name)
@@ -1043,7 +1042,7 @@ abstract class Sprig_Core {
 	/**
 	 * Get all fields as an associative array.
 	 *
-	 * @return  array  name => object
+	 * @return  Sprig_Field[]  name => object
 	 */
 	public function fields()
 	{
@@ -1053,8 +1052,8 @@ abstract class Sprig_Core {
 	/**
 	 * Return a single field input.
 	 *
-	 * @param   string  field name
-	 * @param   array   input attributes
+	 * @param   string  $name   field name
+	 * @param   array   $attr   input attributes
 	 * @return  string
 	 */
 	public function input($name, array $attr = NULL)
@@ -1077,7 +1076,7 @@ abstract class Sprig_Core {
 	/**
 	 * Get all fields as an array of inputs.
 	 *
-	 * @param   boolean  use the input label as the array key
+	 * @param   boolean  $labels   use the input label as the array key
 	 * @return  array    label => input
 	 */
 	public function inputs($labels = TRUE)
@@ -1107,8 +1106,8 @@ abstract class Sprig_Core {
 	/**
 	 * Return a single field label.
 	 *
-	 * @param   string  field name
-	 * @param   array   label attributes
+	 * @param   string  $field  field name
+	 * @param   array   $attr   label attributes
 	 * @return  string
 	 */
 	public function label($field, array $attr = NULL)
@@ -1119,7 +1118,7 @@ abstract class Sprig_Core {
 	/**
 	 * Return a single field value in verbose form.
 	 *
-	 * @param   string  field name
+	 * @param   string  $field  field name
 	 * @return  string
 	 */
 	public function verbose($field)
@@ -1130,7 +1129,7 @@ abstract class Sprig_Core {
 	/**
 	 * Count the number of records using the current data.
 	 *
-	 * @param   object   any Database_Query_Builder_Select, NULL for none
+	 * @param   Database_Query_Builder_Select   $query  any Database_Query_Builder_Select, NULL for none
 	 * @return  $this
 	 */
 	public function count(Database_Query_Builder_Select $query = NULL)
@@ -1169,8 +1168,8 @@ abstract class Sprig_Core {
 	/**
 	 * Load a single record using the current data.
 	 *
-	 * @param   object   any Database_Query_Builder_Select, NULL for none
-	 * @param   integer  number of records to load, FALSE for all
+	 * @param   Database_Query_Builder_Select   $query  any Database_Query_Builder_Select, NULL for none
+	 * @param   integer                         $limit  number of records to load, FALSE for all
 	 * @return  $this
 	 */
 	public function load(Database_Query_Builder_Select $query = NULL, $limit = 1)
@@ -1546,7 +1545,7 @@ abstract class Sprig_Core {
 	 * will be included and checked.
 	 *
 	 * @throws  Validate_Exception  when an error is found
-	 * @param   array  data to check, field => value
+	 * @param   array  $data  data to check, field => value
 	 * @return  array  filtered data
 	 */
 	public function check(array $data = NULL)
