@@ -17,12 +17,13 @@ abstract class Sprig_Core {
 	/**
 	 * Load an empty sprig model.
 	 *
-	 * @param   string  model name
-	 * @param   array   values to pre-populate the model
+	 * @param   string  $name    model name
+	 * @param   array   $values  values to pre-populate the model
 	 * @return  Sprig
 	 */
 	public static function factory($name, array $values = NULL)
 	{
+        /* @var  $model  Sprig */
 		$model = 'Model_'.$name;
 		$model = new $model;
 
@@ -285,7 +286,7 @@ abstract class Sprig_Core {
 	 * Get the value of a field.
 	 *
 	 * @throws  Sprig_Exception  field does not exist
-	 * @param   string  field name
+	 * @param   string  $name  field name
 	 * @return  mixed
 	 */
 	public function __get($name)
@@ -435,8 +436,8 @@ abstract class Sprig_Core {
 	 * Set the value of a field.
 	 *
 	 * @throws  Sprig_Exception  field does not exist
-	 * @param   string  field name
-	 * @param   mixed   new field value
+	 * @param   string  $name   field name
+	 * @param   mixed   $value  new field value
 	 * @return  void
 	 */
 	public function __set($name, $value)
@@ -582,7 +583,7 @@ abstract class Sprig_Core {
 	/**
 	 * Check if a value exists within the mode.
 	 *
-	 * @param   string   field name
+	 * @param   string   $name  field name
 	 * @return  boolean
 	 */
 	public function __isset($name)
@@ -594,7 +595,7 @@ abstract class Sprig_Core {
 	 * Unset the changed the value of a field.
 	 *
 	 * @throws  Sprig_Exception  field does not exist
-	 * @param   string  field name
+	 * @param   string  $name  field name
 	 * @return  void
 	 */
 	public function __unset($name)
@@ -660,8 +661,8 @@ abstract class Sprig_Core {
 	/**
 	 * Adds a relationship to the model
 	 * 
-	 * @param  string  field name to add the relationship to
-	 * @param  mixed   model to add, can be in integer model ID, a single model object, or an array of integers
+	 * @param  string  $name   field name to add the relationship to
+	 * @param  mixed   $value  model to add, can be in integer model ID, a single model object, or an array of integers
 	 * 
 	 * @throws Sprig_Exception  on invalid relationship or model arguments
 	 *
@@ -700,8 +701,8 @@ abstract class Sprig_Core {
 	/**
 	 * Removes a relationship to the model
 	 * 
-	 * @param  string  field name to add the relationship to
-	 * @param  mixed   model to remove, can be in integer model ID, a single model object, or an array of integers
+	 * @param  string  $name   field name to add the relationship to
+	 * @param  mixed   $value  model to remove, can be in integer model ID, a single model object, or an array of integers
 	 * 
 	 * @throws Sprig_Exception  on invalid relationship or model arguments
 	 *
@@ -748,12 +749,12 @@ abstract class Sprig_Core {
 	/**
 	 * Determines if this object has a relation
 	 * 
-	 * @param string field relation name to check
-	 * @param int    the value to compare
-	 *
+	 * @param string  $name   field relation name to check
+	 * @param int     $value  the value to compare
 	 * @return bool
+     * @throws Sprig_Exception
 	 */
-	public function related($name, $value)
+    public function related($name, $value)
 	{
 		if ( ! isset($this->_fields[$name]) OR ! ($this->_fields[$name] instanceof Sprig_Field_HasMany))
 		{
@@ -768,7 +769,7 @@ abstract class Sprig_Core {
 	/**
 	 * Returns the primary key of the model, optionally with a table name.
 	 *
-	 * @param   string  table name, TRUE for the model table
+	 * @param   string  $table  table name, TRUE for the model table
 	 * @return  string
 	 */
 	public function pk($table = NULL)
@@ -789,7 +790,7 @@ abstract class Sprig_Core {
 	/**
 	 * Returns the foreign key of the model, optionally with a table name.
 	 *
-	 * @param   string  table name, TRUE for the model table
+	 * @param   string  $table  table name, TRUE for the model table
 	 * @return  string
 	 */
 	public function fk($table = NULL)
@@ -812,7 +813,7 @@ abstract class Sprig_Core {
 	/**
 	 * Returns the title key of the model, optionally with a table name.
 	 *
-	 * @param   string  table name, TRUE for the model table
+	 * @param   string  $table  table name, TRUE for the model table
 	 * @return  string
 	 */
 	public function tk($table = NULL)
@@ -833,9 +834,10 @@ abstract class Sprig_Core {
 	/**
 	 * Gets and sets the database instance used for this model.
 	 *
+     * @param   string|null  $db
 	 * @return  string
 	 */
-	public function db($db = NULL)
+    public function db($db = NULL)
 	{
 		if ($db)
 		{
@@ -848,7 +850,7 @@ abstract class Sprig_Core {
 	/**
 	 * Gets and sets the table name of the model.
 	 *
-	 * @param   string   new table name
+	 * @param   string   $table  new table name
 	 * @return  string   table name
 	 */
 	public function table($table = NULL)
@@ -865,7 +867,7 @@ abstract class Sprig_Core {
 	 * Load all of the values in an associative array. Ignores all fields are
 	 * not in the model.
 	 *
-	 * @param   array    field => value pairs
+	 * @param   array    $values  field => value pairs
 	 * @return  $this
 	 */
 	public function values(array $values)
@@ -884,9 +886,10 @@ abstract class Sprig_Core {
 	/**
 	 * Get the model data as an associative array.
 	 *
+     * @param bool $verbose
 	 * @return  array  field => value
 	 */
-	public function as_array($verbose = FALSE)
+    public function as_array($verbose = FALSE)
 	{
 		$data = array_merge($this->_original, $this->_changed);
 
@@ -951,11 +954,12 @@ abstract class Sprig_Core {
 	 * - deleted: record has been deleted
 	 * - loaded:  record has been loaded
 	 *
-	 * @param   string  new object status
-	 * @return  string  when getting
-	 * @return  $this   when setting
+	 * @param   string  $state  new object status
+     * @return  $this   when setting
+     * @return  string  when getting
+     * @throws  Sprig_Exception
 	 */
-	public function state($state = NULL)
+    public function state($state = NULL)
 	{
 		if ($state)
 		{
@@ -1001,9 +1005,10 @@ abstract class Sprig_Core {
 	/**
 	 * Get all of the changed fields as an associative array.
 	 *
+     * @param string|null $field
 	 * @return  array  field => value
 	 */
-	public function changed($field = NULL)
+    public function changed($field = NULL)
 	{
 		if ($field === NULL)
 		{
@@ -1314,6 +1319,7 @@ abstract class Sprig_Core {
 		{
 			foreach ($relations as $name => $value)
 			{
+                /* @var $field Sprig_Field_ManyToMany */
 				$field = $this->_fields[$name];
 
 				if ( isset($field->foreign_key) AND $field->foreign_key)
@@ -1416,6 +1422,7 @@ abstract class Sprig_Core {
 			{
 				foreach ($relations as $name => $value)
 				{
+                    /* @var $field Sprig_Field_ManyToMany */
 					$field = $this->_fields[$name];
 
 					$model = Sprig::factory($field->model);
@@ -1487,7 +1494,7 @@ abstract class Sprig_Core {
 	 * - If the record is not loaded, it will be deleted using all changed fields.
 	 * - If no data has been changed, the delete will be ignored.
 	 *
-	 * @param   object   any Database_Query_Builder_Delete, NULL for none
+	 * @param   Database_Query_Builder_Delete|null   $query  any Database_Query_Builder_Delete, NULL for none
 	 * @return  $this
 	 */
 	public function delete(Database_Query_Builder_Delete $query = NULL)
