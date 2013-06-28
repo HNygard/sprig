@@ -117,7 +117,7 @@ abstract class Sprig_Core {
 		if ( ! $this->_table)
 		{
 			// Set the table name to the plural model name
-			$this->_table = inflector::plural($this->_model);
+			$this->_table = Inflector::plural($this->_model);
 		}
 
 		foreach ($this->_fields as $name => $field)
@@ -244,23 +244,23 @@ abstract class Sprig_Core {
 				if ($field->unique)
 				{
 					// Field must be a unique value
-					$field->callbacks[] = array($this, '_unique_field');
+					$field->callbacks[] = array(array(':model', '_unique_field'), array(':value', ':field'));
 				}
 
 				if ($field->choices AND ! isset($field->rules['in_array']))
 				{
 					// Field must be one of the available choices
-					$field->rules['in_array'] = array(array_keys($field->choices));
+					$field->rules['in_array'] = array(':value', array_keys($field->choices));
 				}
 
 				if ( ! empty($field->min_length))
 				{
-					$field->rules['min_length'] = array($field->min_length);
+					$field->rules['min_length'] = array(':value', $field->min_length);
 				}
 
 				if ( ! empty($field->max_length))
 				{
-					$field->rules['max_length'] = array($field->max_length);
+					$field->rules['max_length'] = array(':value', $field->max_length);
 				}
 			}
 
@@ -1551,7 +1551,7 @@ abstract class Sprig_Core {
 	 * Check the given data is valid. Only values that have editable fields
 	 * will be included and checked.
 	 *
-	 * @throws  Validate_Exception  when an error is found
+	 * @throws  Validation_Exception  when an error is found
 	 * @param   array  $data  data to check, field => value
 	 * @return  array  filtered data
 	 */
@@ -1563,7 +1563,7 @@ abstract class Sprig_Core {
 			$data = $this->changed();
 		}
 
-		$data = Validate::factory($data);
+		$data = Validation::factory($data);
 
 		foreach ($this->_fields as $name => $field)
 		{
@@ -1574,6 +1574,7 @@ abstract class Sprig_Core {
 			}
 
 			$data->label($name, $field->label);
+            $data->bind(':model', $this);
 
 			if ($field->filters)
 			{
@@ -1582,18 +1583,22 @@ abstract class Sprig_Core {
 
 			if ($field->rules)
 			{
-				$data->rules($name, $field->rules);
+                $new_rules = array();
+                foreach($field->rules as $rulename => $value) {
+                    $new_rules[] = array($rulename, $value);
+                }
+				$data->rules($name, $new_rules);
 			}
 
 			if ($field->callbacks)
 			{
-				$data->callbacks($name, $field->callbacks);
+				$data->rules($name, $field->callbacks);
 			}
 		}
 
 		if ( ! $data->check())
 		{
-			throw new Validate_Exception($data);
+			throw new Validation_Exception($data);
 		}
 
 		return $data->as_array();
@@ -1602,25 +1607,25 @@ abstract class Sprig_Core {
 	/**
 	 * Callback for validating unique fields.
 	 *
-	 * @param   object  Validate array
-	 * @param   string  field name
-	 * @return  void
-	 */
-	public function _unique_field(Validate $array, $field)
+     * @param   mixed   $field_value
+     * @param   string  $field_name
+     * @return  bool
+     */
+    public function _unique_field($field_value, $field_name)
 	{
-		if ($array[$field])
+		if ($field_value)
 		{
 			$query = DB::select($this->_fields[$this->_primary_key]->column)
 				->from($this->_table)
 				->where(
-					$this->_fields[$field]->column,
+					$this->_fields[$field_name]->column,
 					'=',
-					$this->_fields[$field]->_database_wrap($array[$field]))
+					$this->_fields[$field_name]->_database_wrap($field_value))
 				->execute($this->_db);
 
 			if (count($query))
 			{
-				$array->error($field, 'unique');
+				return false;
 			}
 		}
 	}
