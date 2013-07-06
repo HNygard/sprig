@@ -78,12 +78,12 @@ abstract class Sprig_Field_Core {
 	public $filters = array();
 
 	/**
-	 * @var array {@link Validate} rules for this field.
+	 * @var array {@link Validation} rules for this field.
 	 */
 	public $rules = array();
 
 	/**
-	 * @var array {@link Validate} callbacks for this field.
+	 * @var array {@link Validation} callbacks for this field.
 	 */
 	public $callbacks = array();
 
