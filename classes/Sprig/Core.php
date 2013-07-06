@@ -111,13 +111,13 @@ abstract class Sprig_Core {
 		if ( ! $this->_model)
 		{
 			// Set the model name based on the class name
-			$this->_model = strtolower(substr(get_class($this), 6));
+			$this->_model = substr(get_class($this), 6);
 		}
 
 		if ( ! $this->_table)
 		{
 			// Set the table name to the plural model name
-			$this->_table = Inflector::plural($this->_model);
+			$this->_table = Inflector::plural(strtolower($this->_model));
 		}
 
 		foreach ($this->_fields as $name => $field)
