@@ -200,7 +200,7 @@ description
 :  Description of the field. Default is `''` (an empty string).
 
 filters
-:  Validate filters for this field.
+:  Filters for this field.
 
 rules
 :  Validation rules for this field.

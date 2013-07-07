@@ -1563,6 +1563,15 @@ abstract class Sprig_Core {
 			$data = $this->changed();
 		}
 
+        foreach ($this->_fields as $name => $field) {
+
+            if ($field->filters && isset($data[$name]))
+            {
+                $data[$name] = $this->run_filter($field->filters, $name, $data[$name]);
+            }
+        }
+
+
 		$data = Validation::factory($data);
 
 		foreach ($this->_fields as $name => $field)
@@ -1575,11 +1584,6 @@ abstract class Sprig_Core {
 
 			$data->label($name, $field->label);
             $data->bind(':model', $this);
-
-			if ($field->filters)
-			{
-				$data->filters($name, $field->filters);
-			}
 
 			if ($field->rules)
 			{
@@ -1637,5 +1641,73 @@ abstract class Sprig_Core {
 	 * @return  void
 	 */
 	abstract protected function _init();
+
+    /**
+     * Filters a value for a specific column
+     *
+     * Copied from https://github.com/kohana/orm @ cb4be3a6d9442ef9ab978c7306c5e0841e3d75d9, class Kohana_ORM
+     * Modified to fit Sprig
+     *
+     * @param  array  $filters  The filters for this field
+     * @param  string $fieldname  The column name
+     * @param  string $value  The value to filter
+     * @return string
+     */
+    protected function run_filter($filters, $fieldname, $value)
+    {
+        // Bind the field name and model so they can be used in the filter method
+        $_bound = array
+        (
+            ':fieldname' => $fieldname,
+            ':model' => $this,
+        );
+
+        foreach ($filters as $array)
+        {
+            // Value needs to be bound inside the loop so we are always using the
+            // version that was modified by the filters that already ran
+            $_bound[':value'] = $value;
+
+            // Filters are defined as array($filter, $params)
+            $filter = $array[0];
+            $params = Arr::get($array, 1, array(':value'));
+
+            foreach ($params as $key => $param)
+            {
+                if (is_string($param) AND array_key_exists($param, $_bound))
+                {
+                    // Replace with bound value
+                    $params[$key] = $_bound[$param];
+                }
+            }
+
+            if (is_array($filter) OR ! is_string($filter))
+            {
+                // This is either a callback as an array or a lambda
+                $value = call_user_func_array($filter, $params);
+            }
+            elseif (strpos($filter, '::') === FALSE)
+            {
+                // Use a function call
+                $function = new ReflectionFunction($filter);
+
+                // Call $function($this[$field], $param, ...) with Reflection
+                $value = $function->invokeArgs($params);
+            }
+            else
+            {
+                // Split the class and method of the rule
+                list($class, $method) = explode('::', $filter, 2);
+
+                // Use a static method call
+                $method = new ReflectionMethod($class, $method);
+
+                // Call $Class::$method($this[$field], $param, ...) with Reflection
+                $value = $method->invokeArgs(NULL, $params);
+            }
+        }
+
+        return $value;
+    }
 
 } // End Sprig

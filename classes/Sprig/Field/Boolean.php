@@ -13,7 +13,7 @@ class Sprig_Field_Boolean extends Sprig_Field {
 
 	public $default = FALSE;
 
-	public $filters = array('filter_var' => array(FILTER_VALIDATE_BOOLEAN));
+	public $filters = array(array('filter_var', array(':value', FILTER_VALIDATE_BOOLEAN)));
 
 	public $append_label = TRUE;
 
